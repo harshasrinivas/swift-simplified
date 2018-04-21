@@ -3,6 +3,7 @@ import struct
 import sys, os
 import getpass
 from subprocess import call
+from hashlib import md5
 
 USERNAME = getpass.getuser()
 
@@ -84,8 +85,15 @@ def validate_disk_duplicates(disks):
 	return True
 
 
+def get_partition(username, filename, partition_power):
 
-def upload(conn):
+        key = '%s/%s' % (username, filename)
+        objhash = md5(key.encode('utf-8')).hexdigest()
+        partition = int(int(objhash, 16) >> 128 - partition_power)
+        print(partition)
+
+
+def upload(conn, partition_power):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
@@ -95,7 +103,10 @@ def upload(conn):
 	with open(server_filename, 'wb+') as f:
 		f.write(client_filedata)
 
-	print('Uploaded file stored at %s' % server_filename)
+	p = get_partition(client_username, client_filename, partition_power)
+	
+	print('Uploaded file stored at %s and partition %s' % (server_filename, p))
+
 
 
 def main():
@@ -103,7 +114,12 @@ def main():
 	if not validate_command_args():
 		return
 
-	partitions = sys.argv[1]
+	# Exception needed for partition power > 32
+	try:
+		partition_power = int(sys.argv[1])
+	except:
+		print('Invalid command format. Partition power must be an integer')
+
 	disks = sys.argv[2:]
 
 	if not validate_disk_addresses(disks):
@@ -117,11 +133,9 @@ def main():
 	while True:
 		conn, addr = sock.accept()
 
-		# CREATE LOGGING
-
 		client_command = customized_recv(conn).decode('utf-8')
 		if client_command == 'upload':
-			upload(conn)
+			upload(conn, partition_power)
 
 
 
