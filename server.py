@@ -1,6 +1,8 @@
 import socket
 import struct
-import sys, os
+import sys
+import os
+import math
 import getpass
 from subprocess import call
 from hashlib import md5
