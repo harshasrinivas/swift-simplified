@@ -84,6 +84,20 @@ def validate_disk_duplicates(disks):
 	return True
 
 
+
+def upload(conn):
+	client_username = customized_recv(conn).decode('utf-8')
+	client_filename = customized_recv(conn).decode('utf-8')
+	client_filedata = customized_recv(conn)
+
+	server_filename = './files/' + client_filename
+
+	with open(server_filename, 'wb+') as f:
+		f.write(client_filedata)
+
+	print('Uploaded file stored at %s' % server_filename)
+
+
 def main():
 
 	if not validate_command_args():
@@ -103,19 +117,11 @@ def main():
 	while True:
 		conn, addr = sock.accept()
 
-		print('New client connected')
-
 		# CREATE LOGGING
 
 		client_command = customized_recv(conn).decode('utf-8')
-		client_username = customized_recv(conn).decode('utf-8')
-		client_filename = customized_recv(conn).decode('utf-8')
-		client_filedata = customized_recv(conn)
-
-		server_filename = client_filename + '_server'
-
-		with open(server_filename, 'wb+') as f:
-			f.write(client_filedata)
+		if client_command == 'upload':
+			upload(conn)
 
 
 
