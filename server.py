@@ -90,10 +90,21 @@ def get_partition(username, filename, partition_power):
         key = '%s/%s' % (username, filename)
         objhash = md5(key.encode('utf-8')).hexdigest()
         partition = int(int(objhash, 16) >> 128 - partition_power)
-        print(partition)
+        return partition
 
 
-def upload(conn, partition_power):
+def get_disk(partition, partition_power, disks):
+
+	partitions = 2**partition_power
+	partitions_per_disk = int(partitions/len(disks))
+
+	test = partition/partitions_per_disk
+	test2 = math.ceil(partition/partitions_per_disk)
+	print(test, test2)
+	return test2
+
+
+def upload(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
@@ -103,10 +114,10 @@ def upload(conn, partition_power):
 	with open(server_filename, 'wb+') as f:
 		f.write(client_filedata)
 
-	p = get_partition(client_username, client_filename, partition_power)
+	partition = get_partition(client_username, client_filename, partition_power)
+	disk = get_disk(partition, partition_power, disks)
 	
-	print('Uploaded file stored at %s and partition %s' % (server_filename, p))
-
+	print('Uploaded %s : partition %s - disk %s' % (server_filename, partition, disk))
 
 
 def main():
@@ -125,6 +136,8 @@ def main():
 	if not validate_disk_addresses(disks):
 		return
 
+	# get valid disks within disks variable - include Y/n prompt
+
 	sock = create_socket()
 
 	for disk in disks:
@@ -135,9 +148,7 @@ def main():
 
 		client_command = customized_recv(conn).decode('utf-8')
 		if client_command == 'upload':
-			upload(conn, partition_power)
-
-
+			upload(conn, partition_power, disks)
 
 	socket.close()
 
