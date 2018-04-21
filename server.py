@@ -41,7 +41,7 @@ def create_socket():
 
 
 def create_remote_dir(ip, parent, dirname):
-	command = 'ssh %s \"mkdir -p %s/%s && chmod 777 %s/%s\"' % (ip, parent, dirname, parent, dirname)
+	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"mkdir -p %s/%s && chmod 777 %s/%s\"' % (ip, parent, dirname, parent, dirname)
 	os.system(command)
 
 
