@@ -162,7 +162,6 @@ def main():
 	try:
 		HOST = sys.argv[1]
 		PORT = int(sys.argv[2])
-		print(HOST, PORT)
 	except:
 		print('Invalid command format. Please provide a valid IP and Port number of the server.')
 	
