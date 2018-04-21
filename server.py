@@ -98,12 +98,9 @@ def get_partition(username, filename, partition_power):
 def get_disk(partition, partition_power, disks):
 
 	partitions = 2**partition_power
-	partitions_per_disk = int(partitions/len(disks))
-
-	test = partition/partitions_per_disk
-	test2 = math.ceil(partition/partitions_per_disk)
-	print(test, test2)
-	return test2
+	partitions_per_disk = partitions/len(disks)
+	disk = min(math.ceil(partition/partitions_per_disk), partition_power)
+	return disk
 
 
 def upload(conn, partition_power, disks):
