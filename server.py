@@ -7,11 +7,22 @@ import getpass
 import threading
 import subprocess
 import shutil
+import datetime
 from hashlib import md5
 
 USERNAME = getpass.getuser()
 
 maindict = dict()
+
+
+def server_log(var, dt=False):
+
+	with open('server.log', 'a+') as f:
+		if dt:
+			print('='*40, file=f)
+			print(datetime.datetime.utcnow(), file=f)
+		print(var, file=f)
+
 
 def customized_recvall(conn, count):
     buf = ''.encode('utf-8')
@@ -45,9 +56,21 @@ def create_socket():
 	HOSTNAME = socket.getfqdn()
 	IP_ADDRESS = socket.gethostbyname(HOSTNAME)
 
-	print('Server IP: ', IP_ADDRESS)
-	print('Server Port: ', PORT)
-	print('Server Hostname: ', HOSTNAME)
+	output = 'Server IP: ' + IP_ADDRESS
+	print(output)
+	server_log(output)
+
+	output = 'Server Port: ' + str(PORT)
+	print(output)
+	server_log(output)
+
+	output = 'Server Hostname: ' + HOSTNAME
+	print(output)
+	server_log(output)
+
+	output = 'To connect to this server, use the following command:\npython3 client.py %s %s\n(or)\npython3 client.py %s %s' % (IP_ADDRESS, PORT, HOSTNAME, PORT)
+	print(output)
+	server_log(output)
 
 	return sock
 
@@ -85,7 +108,9 @@ def delete_remote_file(ip, filepath, client_filename):
 
 def validate_command_args():
 	if len(sys.argv) < 3:
-		print('Invalid command format.\nUsage: ./server.py 16 129.210.16.80 129.210.16.81 129.210.16.82')
+		output = 'Invalid command format.\nUsage: python3 server.py 16 129.210.16.80 129.210.16.81 129.210.16.82'
+		print(output)
+		server_log(output)
 		return False
 	return True
 
@@ -102,11 +127,15 @@ def validate_disk_addresses(disks):
 			if i1 == '129' and i2 == '210' and i3 == '16' and i4 >= '71' and i4 <= '95':
 				continue
 			else:
-				print('Invalid command format.\nIP addresses of the drives must be within the range of 129.210.16.71 - 129.210.16.95')
+				output = 'Invalid command format.\nIP addresses of the drives must be within the range of 129.210.16.71 - 129.210.16.95'
+				print(output)
+				server_log(output)
 				return_val = return_val & False
 				break
 		except:
-			print('Invalid IP address format')
+			output = 'Invalid IP address format'
+			print(output)
+			server_log(output)
 			return_val = return_val & False
 			break
 
@@ -118,7 +147,9 @@ def validate_disk_duplicates(disks):
 	seen = set()
 	uniq = [x for x in disks if x not in seen and not seen.add(x)]
 	if len(uniq) != len(disks):
-		print('Invalid IP format - Duplicate IPs')
+		output = 'Invalid IP format - Duplicate IPs'
+		print(output)
+		server_log(output)
 		return False
 	return True
 
@@ -145,15 +176,21 @@ def upload_to_disk(disk, remotepath, localpath, client_filename, prompt=False):
 	create_remote_file(disk, remotepath, localpath)
 
 	if prompt:
-		print('Uploaded %s to disk %s' % (client_filename, disk))
+		output = 'Uploaded %s to disk %s' % (client_filename, disk)
+		print(output)
+		server_log(output)
 	else:
-		print('Uploaded backup of %s to disk %s' % (client_filename, disk))
+		output = 'Uploaded backup of %s to disk %s' % (client_filename, disk)
+		print(output)
+		server_log(output)
 
 
 def upload(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
+
+	server_log('upload ' + client_username + ' ' + client_filename, True)
 
 	global maindict
 
@@ -215,15 +252,21 @@ def download(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	
+	server_log('download ' + client_username + ' ' + client_filename, True)
+
 	global maindict
 
 	if client_username not in maindict:
-		print('User %s not found' % client_username)
+		output = 'User %s not found' % client_username
+		print(output)
+		server_log(output)
 		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		print('File %s not found for User %s' % (client_filename, client_username))
+		output = 'File %s not found for User %s' % (client_filename, client_username)
+		print(output)
+		server_log(output)
 		customized_send(conn, b'failfile')
 		return
 
@@ -256,22 +299,30 @@ def delete_from_disk(disk, remotepath, client_filename, prompt=False):
 	delete_remote_file(disk, remotepath, client_filename)
 
 	if prompt:
-		print('Deleted %s from disk %s' % (client_filename, disk))
+		output = 'Deleted %s from disk %s' % (client_filename, disk)
+		print(output)
+		server_log(output)
 
 
 def delete(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 
+	server_log('delete ' + client_username + ' ' + client_filename, True)
+
 	global maindict
 
 	if client_username not in maindict:
-		print('User %s not found' % client_username)
+		output = 'User %s not found' % client_username
+		print(output)
+		server_log(output)
 		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		print('File %s not found for User %s' % (client_filename, client_username))
+		output = 'File %s not found for User %s' % (client_filename, client_username)
+		print(output)
+		server_log(output)
 		customized_send(conn, b'failfile')
 		return
 
@@ -307,17 +358,23 @@ def list_from_disk(disk, client_username):
 		retval += b'total 0\n'
 
 	retval += b'\n'
-	print(retval.decode('utf-8'))
+	output = retval.decode('utf-8')
+	print(output)
+	server_log(output)
 	return retval
 
 
 def list(conn, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 
+	server_log('list ' + client_username, True)
+
 	global maindict
 
 	if client_username not in maindict:
-		print('User %s not found' % client_username)
+		output = 'User %s not found' % client_username
+		print(output)
+		server_log(output)
 		customized_send(conn, b'fail')
 		return
 
@@ -332,13 +389,17 @@ def list(conn, disks):
 
 def main():
 
+	server_log('', True)
+
 	if not validate_command_args():
 		return
 
 	try:
 		partition_power = int(sys.argv[1])
 	except:
-		print('Invalid command format. Partition power must be an integer')
+		output = 'Invalid command format. Partition power must be an integer'
+		print(output)
+		server_log(output)
 
 	disks = sys.argv[2:]
 
