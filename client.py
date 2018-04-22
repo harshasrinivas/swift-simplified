@@ -147,6 +147,7 @@ def operation_delete(username, filename, sock):
 		return
 	elif response == b'failfile':
 		output = 'The requested file %s does not exist for user %s' % (filename, username)
+		print(output)
 		client_log(output)
 		return
 
