@@ -183,6 +183,8 @@ def main():
 			flag = process(query, HOST, PORT)
 		except KeyboardInterrupt:
 			return
+		except ConnectionRefusedError:
+			print('Server seems to be down at the moment. Please try again later.')
 
 
 main()
