@@ -162,9 +162,9 @@ def upload(conn, partition_power, disks):
 
 	if client_filename in maindict[client_username]:
 		customized_send(conn, b'File already exists. Would you like to overwrite? (Y/n)')
-		response = customized_recv(conn)
+		response = customized_recv(conn).decode('utf-8')
 
-		if response == 'y' or response == 'Y':
+		if 'y' in response or 'Y' in response:
 			pass
 		else:
 			return
@@ -217,12 +217,12 @@ def download(conn, partition_power, disks):
 
 	if client_username not in maindict:
 		print('User %s not found' % client_username)
-		customized_send(conn, b'fail')
+		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
 		print('File %s not found for User %s' % (client_filename, client_username))
-		customized_send(conn, b'fail')
+		customized_send(conn, b'failfile')
 		return
 
 

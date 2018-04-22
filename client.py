@@ -49,16 +49,20 @@ def operation_upload(username, filename, sock):
 	response = customized_recv(sock)
 
 	if response == b'File already exists. Would you like to overwrite? (Y/n)':
-		x = input('> ')
+		print(response.decode('utf-8'))
+		x = ''
+
+		while x == '':
+			x = input('> (Y/n)? ')
+
 		customized_send(sock, x.encode('utf-8'))
 
-		if x == 'Y' or x == 'y':
+		if 'y' in x or 'Y' in x:
 			response = customized_recv(sock)
 		else:
 			return
 
-
-	print('Upload operation completed. File has been stored in %s' % response)
+	print('Upload operation completed. File has been stored in %s' % response.decode('utf-8'))
 
 
 def operation_download(username, filename, sock):
@@ -68,8 +72,11 @@ def operation_download(username, filename, sock):
 	
 	client_filedata = customized_recv(sock)
 
-	if client_filedata == b'fail':
-		print('The requested file %s does not exist' % filename)
+	if client_filedata == b'failuser':
+		print('The requested user %s does not exist' % (username))
+		return
+	elif client_filedata == b'failfile':
+		print('The requested file %s does not exist for user %s' % (filename, username))
 		return
 
 	download_dir = './client-downloads/'
