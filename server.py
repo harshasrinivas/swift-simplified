@@ -195,7 +195,11 @@ def main():
 	while True:
 		try:
 			conn, addr = sock.accept()
-			client_command = customized_recv(conn).decode('utf-8')
+
+			try:
+				client_command = customized_recv(conn).decode('utf-8')
+			except TypeError:
+				continue
 			
 			if client_command == 'upload':
 				upload(conn, partition_power, disks)

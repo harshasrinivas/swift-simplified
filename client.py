@@ -171,6 +171,7 @@ def main():
 		sock.close()
 	except:
 		print('Unable to connect to the server. Kindly ensure that the server IP/hostname and Port number is accurate.')
+		return
 	
 	print('> Welcome! Type `help` for instructions')
 
