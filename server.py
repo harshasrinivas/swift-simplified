@@ -175,7 +175,7 @@ def upload(conn, partition_power, disks):
 	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
 
 
-def download_from_disk(disk, remotepath, localpath):
+def download_from_disk(disk, remotepath, localpath, conn):
 
 	download_remote_file(disk, remotepath, localpath)
 
@@ -203,7 +203,7 @@ def download(conn, partition_power, disks):
 
 	localpath = download_subdir + client_filename
 
-	download_from_disk(disk, remotepath, localpath)
+	download_from_disk(disk, remotepath, localpath, conn)
 
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
