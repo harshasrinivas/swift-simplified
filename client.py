@@ -2,7 +2,6 @@ import socket
 import struct
 import sys
 import os
-import shutil
 
 COMMANDS_LIST = ['upload', 'download', 'delete', 'list']
 
@@ -71,8 +70,7 @@ def operation_download(username, filename, sock):
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
 
-	print('Download operation completed..')
-	shutil.rmtree(download_dir)
+	print('Download operation completed.. File stored in %s' % download_subdir)
 	return
 
 

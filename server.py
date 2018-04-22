@@ -175,7 +175,10 @@ def upload(conn, partition_power, disks):
 	upload_to_disk(disk, remotepath, localpath, client_filename, True)
 	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
 
-	shutil.rmtree(upload_dir)
+	try:
+		shutil.rmtree(upload_dir)
+	except FileNotFoundError:
+		continue
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -208,7 +211,10 @@ def download(conn, partition_power, disks):
 
 	download_from_disk(disk, remotepath, localpath, conn)
 
-	shutil.rmtree(download_dir)
+	try:
+		shutil.rmtree(download_dir)
+	except FileNotFoundError:
+		continue
 
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
@@ -284,8 +290,15 @@ def main():
 	upload_dir = './server-uploads/'
 	download_dir = './server-downloads/'
 
-	shutil.rmtree(upload_dir)
-	shutil.rmtree(download_dir)
+	try:
+		shutil.rmtree(upload_dir)
+	except FileNotFoundError:
+		continue
+
+	try:
+		shutil.rmtree(download_dir)
+	except FileNotFoundError:
+		continue
 
 	while True:
 		try:
