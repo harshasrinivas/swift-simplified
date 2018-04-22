@@ -48,6 +48,11 @@ def create_remote_dir(ip, dirpath):
 	os.system(command)
 
 
+def delete_remote_dir(ip, dirpath):
+	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"rm -rf %s/*\"' % (ip, dirpath)
+	os.system(command)
+
+
 def create_remote_file(ip, filepath, localpath):
 
 	command = 'scp -q -B %s %s:%s' % (localpath, ip, filepath)
@@ -188,7 +193,7 @@ def list_from_disk(disk, client_username):
 		print(i.decode('utf-8'), end='')
 
 	if len(result) == 0:
-		print('No files of %s are present in this disk' % client_username)
+		print('total 0')
 
 	print('')
 
@@ -220,6 +225,7 @@ def main():
 
 	for disk in disks:
 		create_remote_dir(disk, '/tmp/' + USERNAME)
+		delete_remote_dir(disk, '/tmp/' + USERNAME)
 
 	while True:
 		try:
