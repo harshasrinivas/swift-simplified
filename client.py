@@ -288,7 +288,7 @@ def process(query, HOST, PORT):
 
 def main():
 
-	print(var='', dt=True)
+	print('', True)
 
 	if len(sys.argv) < 3:
 		output = 'Invalid command format\nUsage: python client.py 129.210.16.80 9999 (or) python client.py linux60810.dc.engr.scu.edu 9999'
