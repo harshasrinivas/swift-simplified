@@ -336,6 +336,8 @@ def delete(conn, partition_power, disks):
 
 	customized_send(conn, b'success')
 
+	maindict[client_username].remove(client_filename)
+
 
 def list_from_disk(disk, client_username):
 
