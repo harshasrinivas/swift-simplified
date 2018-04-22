@@ -1,6 +1,7 @@
 import socket
 import struct
 import sys
+import os
 
 COMMANDS_LIST = ['upload', 'download', 'delete', 'list']
 
