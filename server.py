@@ -330,7 +330,6 @@ def list(conn, disks):
 	customized_send(conn, retval)
 
 
-
 def main():
 
 	if not validate_command_args():

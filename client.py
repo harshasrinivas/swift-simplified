@@ -287,6 +287,8 @@ def main():
 		except ConnectionRefusedError:
 			print('Server seems to be down at the moment. Please try again later.')
 			return
+		except:
+			continue
 
 
 main()
