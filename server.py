@@ -42,8 +42,17 @@ def create_socket():
 	return sock
 
 
-def create_remote_dir(ip, parent, dirname):
-	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"mkdir -p %s/%s && chmod 777 %s/%s\"' % (ip, parent, dirname, parent, dirname)
+def create_remote_dir(ip, dirpath):
+	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"mkdir -p %s && chmod 777 %s\"' % (ip, dirpath, dirpath)
+	os.system(command)
+
+
+def create_remote_file(ip, filepath, localpath):
+
+	command = 'scp -B %s %s:%s' % (localpath, ip, filepath)
+	os.system(command)
+
+	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"chmod 666 %s/*\"' % (ip, filepath)
 	os.system(command)
 
 
@@ -100,7 +109,7 @@ def get_disk(partition, partition_power, disks):
 	partitions = 2**partition_power
 	partitions_per_disk = partitions/len(disks)
 	disk = min(math.ceil(partition/partitions_per_disk), partition_power)
-	return disk
+	return disks[disk - 1]
 
 
 def upload(conn, partition_power, disks):
@@ -108,15 +117,19 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
-	server_filename = './files/' + client_filename
+	localpath = './files/' + client_filename
 
-	with open(server_filename, 'wb+') as f:
+	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
 
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk = get_disk(partition, partition_power, disks)
 	
-	print('Uploaded %s : partition %s - disk %s' % (server_filename, partition, disk))
+	print('Uploaded %s : partition %s - disk %s' % (localpath, partition, disk))
+
+	remotepath = '/tmp/' + USERNAME + '/' + client_username
+	create_remote_dir(disk, remotepath)
+	create_remote_file(disk, remotepath, localpath)
 
 
 def main():
@@ -140,7 +153,7 @@ def main():
 	sock = create_socket()
 
 	for disk in disks:
-		create_remote_dir(disk, '/tmp', USERNAME)
+		create_remote_dir(disk, '/tmp/' + USERNAME)
 
 	while True:
 		conn, addr = sock.accept()
