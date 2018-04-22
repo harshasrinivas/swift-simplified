@@ -171,7 +171,7 @@ def get_disk(partition, partition_power, disks):
 	return disks[disk - 1], disks[backup_disk - 1]
 
 
-def upload_to_disk(disk, remotepath, localpath, client_filename, prompt=False):
+def upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, prompt=False):
 	create_remote_dir(disk, remotepath)
 	create_remote_file(disk, remotepath, localpath)
 
@@ -183,6 +183,11 @@ def upload_to_disk(disk, remotepath, localpath, client_filename, prompt=False):
 		output = 'Uploaded backup of %s to disk %s' % (client_filename, disk)
 		print(output)
 		server_log(output)
+
+		try:
+			shutil.rmtree(upload_dir)
+		except FileNotFoundError:
+			pass
 
 
 def upload(conn, partition_power, disks):
@@ -227,13 +232,8 @@ def upload(conn, partition_power, disks):
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
 	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
 
-	upload_to_disk(disk, remotepath, localpath, client_filename, True)
-	upload_to_disk(backup_disk, remotebackuppath, localpath, client_filename)
-
-	try:
-		shutil.rmtree(upload_dir)
-	except FileNotFoundError:
-		pass
+	upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, True)
+	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename, upload_dir,)).start()
 
 	customized_send(conn, disk.encode('utf-8'))
 	customized_send(conn, remotepath.encode('utf-8'))
