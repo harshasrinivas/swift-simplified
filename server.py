@@ -155,6 +155,22 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
+	global maindict
+
+	if client_username not in maindict:
+		maindict[client_username] = set()
+
+	if client_filename in maindict[client_username]:
+		customized_send(conn, b'File already exists. Would you like to overwrite? (Y/n)')
+		response = customized_recv(conn)
+
+		if response == 'y' or response == 'Y':
+			pass
+		else:
+			return
+
+	maindict[client_username].add(client_filename)
+
 	upload_dir = './server-uploads/'
 	upload_subdir = './server-uploads/%s/' % client_username
 
@@ -182,12 +198,7 @@ def upload(conn, partition_power, disks):
 	except FileNotFoundError:
 		pass
 
-	global maindict
-
-	if client_username not in maindict:
-		maindict[client_username] = set()
-
-	maindict[client_username].add(client_filename)
+	customized_send(conn, disk.encode('utf-8'))
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -205,13 +216,13 @@ def download(conn, partition_power, disks):
 	global maindict
 
 	if client_username not in maindict:
-		# Send message to client
 		print('User %s not found' % client_username)
+		customized_send(conn, b'fail')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		# Send message to client
 		print('File %s not found for User %s' % (client_filename, client_username))
+		customized_send(conn, b'fail')
 		return
 
 
@@ -253,13 +264,13 @@ def delete(conn, partition_power, disks):
 	global maindict
 
 	if client_username not in maindict:
-		# Send message to client
 		print('User %s not found' % client_username)
+		customized_send(conn, b'fail')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		# Send message to client
 		print('File %s not found for User %s' % (client_filename, client_username))
+		customized_send(conn, b'fail')
 		return
 
 	partition = get_partition(client_username, client_filename, partition_power)
@@ -269,6 +280,8 @@ def delete(conn, partition_power, disks):
 
 	delete_from_disk(disk, remotepath, client_filename, True)
 	threading.Thread(target=delete_from_disk, args=(backup_disk, remotebackuppath, client_filename,)).start()
+
+	customized_send(conn, b'success')
 
 
 def list_from_disk(disk, client_username):
@@ -349,7 +362,7 @@ def main():
 				client_command = customized_recv(conn).decode('utf-8')
 			except TypeError:
 				continue
-			
+
 			if client_command == 'upload':
 				upload(conn, partition_power, disks)
 			elif client_command == 'download':

@@ -46,7 +46,19 @@ def operation_upload(username, filename, sock):
 	with open(filename, 'rb') as f:
 		customized_send(sock, f.read())
 	
-	print('Upload operation completed..')
+	response = customized_recv(sock)
+
+	if response == b'File already exists. Would you like to overwrite? (Y/n)':
+		x = input('> ')
+		customized_send(sock, x.encode('utf-8'))
+
+		if x == 'Y' or x == 'y':
+			response = customized_recv(sock)
+		else:
+			return
+
+
+	print('Upload operation completed. File has been stored in %s' % response)
 
 
 def operation_download(username, filename, sock):
@@ -55,6 +67,10 @@ def operation_download(username, filename, sock):
 	customized_send(sock, filename.encode('utf-8'))
 	
 	client_filedata = customized_recv(sock)
+
+	if client_filedata == b'fail':
+		print('The requested file %s does not exist' % filename)
+		return
 
 	download_dir = './client-downloads/'
 	download_subdir = './client-downloads/%s/' % username
@@ -70,7 +86,7 @@ def operation_download(username, filename, sock):
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
 
-	print('Download operation completed.. File stored in %s' % download_subdir)
+	print('Download operation completed. File has been stored in %s' % download_subdir)
 	return
 
 
@@ -79,14 +95,20 @@ def operation_delete(username, filename, sock):
 	customized_send(sock, username.encode('utf-8'))
 	customized_send(sock, filename.encode('utf-8'))
 
-	print('Delete operation completed..')
+	response = customized_recv(sock)
+
+	if response == b'fail':
+		print('The requested file %s does not exist' % filename)
+		return
+
+	print('Delete operation completed.')
 
 
 def operation_list(username, sock):
 	customized_send(sock, 'list'.encode('utf-8'))
 	customized_send(sock, username.encode('utf-8'))
 	
-	print('List operation completed..')
+	print('List operation completed.')
 
 
 def evaluate_uname(username):
