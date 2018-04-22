@@ -293,12 +293,12 @@ def main():
 	try:
 		shutil.rmtree(upload_dir)
 	except FileNotFoundError:
-		continue
+		pass
 
 	try:
 		shutil.rmtree(download_dir)
 	except FileNotFoundError:
-		continue
+		pass
 
 	while True:
 		try:
