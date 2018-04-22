@@ -386,7 +386,7 @@ def main():
 		except KeyboardInterrupt:
 			break
 
-	socket.close()
+	sock.close()
 
 
 main()
