@@ -4,6 +4,21 @@ import sys
 
 COMMANDS_LIST = ['upload', 'download', 'delete', 'list']
 
+def customized_recvall(conn, count):
+    buf = ''.encode('utf-8')
+    while count:
+        newbuf = conn.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
+
+def customized_recv(conn):
+	lengthbuf = customized_recvall(conn, 4)
+	length, = struct.unpack('!I', lengthbuf)
+	return customized_recvall(conn, length)
+
 
 def customized_send(sock, data):
     length = len(data)
@@ -34,6 +49,26 @@ def operation_upload(username, filename, sock):
 
 
 def operation_download(username, filename, sock):
+	customized_send(sock, 'download'.encode('utf-8'))
+	customized_send(sock, username.encode('utf-8'))
+	customized_send(sock, filename.encode('utf-8'))
+	
+	client_filedata = customized_recv(sock)
+
+	download_dir = './client-downloads/'
+	download_subdir = './client-downloads/%s/' % username
+
+	if not os.path.exists(download_dir):
+		os.makedirs(download_dir)
+
+	if not os.path.exists(download_subdir):
+		os.makedirs(download_subdir)
+
+	localpath = download_subdir + client_filename
+
+	with open(localpath, 'wb+') as f:
+		f.write(client_filedata)
+
 	print('Download operation completed..')
 	return
 

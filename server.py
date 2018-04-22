@@ -26,6 +26,12 @@ def customized_recv(conn):
 	return customized_recvall(conn, length)
 
 
+def customized_send(conn, data):
+    length = len(data)
+    conn.sendall(struct.pack('!I', length))
+    conn.sendall(data)
+
+
 def create_socket():
 
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,6 +65,12 @@ def create_remote_file(ip, filepath, localpath):
 	os.system(command)
 
 	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"chmod 666 %s/*\"' % (ip, filepath)
+	os.system(command)
+
+
+def download_remote_file(ip, filepath, localpath):
+
+	command = 'scp -q -B %s:%s %s' % (ip, filepath, localpath)
 	os.system(command)
 
 
@@ -140,12 +152,16 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
-	upload_dir = './upload-files/'
+	upload_dir = './server-uploads/'
+	upload_subdir = './server-uploads/%s/' % username
 
 	if not os.path.exists(upload_dir):
 		os.makedirs(upload_dir)
 
-	localpath = upload_dir + client_filename
+	if not os.path.exists(upload_subdir):
+		os.makedirs(upload_subdir)
+
+	localpath = upload_subdir + client_filename
 
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
@@ -157,6 +173,37 @@ def upload(conn, partition_power, disks):
 
 	upload_to_disk(disk, remotepath, localpath, client_filename, True)
 	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
+
+
+def download_from_disk(disk, remotepath, localpath):
+
+	download_remote_file(disk, remotepath, localpath)
+
+	with open(localpath, 'rb') as f:
+		customized_send(conn, f.read())
+
+
+def download(conn, partition_power, disks):
+	client_username = customized_recv(conn).decode('utf-8')
+	client_filename = customized_recv(conn).decode('utf-8')
+	
+	partition = get_partition(client_username, client_filename, partition_power)
+	disk, backup_disk = get_disk(partition, partition_power, disks)
+	remotepath = '/tmp/' + USERNAME + '/' + client_username
+	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
+
+	download_dir = './server-downloads/'
+	download_subdir = './server-downloads/%s/' % username
+
+	if not os.path.exists(download_dir):
+		os.makedirs(download_dir)
+
+	if not os.path.exists(download_subdir):
+		os.makedirs(download_subdir)
+
+	localpath = download_subdir + client_filename
+
+	download_from_disk(disk, remotepath, localpath)
 
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
