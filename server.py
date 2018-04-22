@@ -84,10 +84,10 @@ def validate_disk_addresses(disks):
 		try:
 			[i1, i2, i3, i4] = i.split('.')
 
-			if i1 == '129' and i2 == '210' and i3 == '16' and i4 >= '80' and i4 <= '99':
+			if i1 == '129' and i2 == '210' and i3 == '16' and i4 >= '71' and i4 <= '95':
 				continue
 			else:
-				print('Invalid command format.\nIP addresses of the drives must be within the range of 129.210.16.80 - 129.210.16.99')
+				print('Invalid command format.\nIP addresses of the drives must be within the range of 129.210.16.71 - 129.210.16.95')
 				return_val = return_val & False
 				break
 		except:
@@ -131,6 +131,8 @@ def upload_to_disk(disk, remotepath, localpath, client_filename, prompt=False):
 
 	if prompt:
 		print('Uploaded %s to disk %s' % (client_filename, disk))
+	else:
+		print('Uploaded backup of %s to disk %s' % (client_filename, disk))
 
 
 def upload(conn, partition_power, disks):
