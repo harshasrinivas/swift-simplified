@@ -287,6 +287,8 @@ def main():
 			
 			if client_command == 'upload':
 				upload(conn, partition_power, disks)
+			elif client_command == 'download':
+				download(conn, partition_power, disks)
 			elif client_command == 'delete':
 				delete(conn, partition_power, disks)
 			elif client_command == 'list':
