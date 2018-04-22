@@ -158,16 +158,20 @@ def process(query, HOST, PORT):
 def main():
 
 	if len(sys.argv) < 3:
-		print('Invalid command format\nUsage: python client.py 129.210.16.80 9999')
+		print('Invalid command format\nUsage: python client.py 129.210.16.80 9999 (or) python client.py linux60810.dc.engr.scu.edu 9999')
 		return
 
 	try:
 		HOST = sys.argv[1]
 		PORT = int(sys.argv[2])
 	except:
-		print('Invalid command format. Please provide a valid IP and Port number of the server.')
+		print('Invalid command format. Please provide a valid IP/hostname and Port number of the server.')
 
 	try:
+
+		if HOST[:5] == 'linux':
+			HOST = socket.gethostbyname(HOST)
+
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.connect((HOST, PORT))
 		sock.close()
