@@ -39,8 +39,11 @@ def operation_download(username, filename, sock):
 
 
 def operation_delete(username, filename, sock):
+	customized_send(sock, 'delete'.encode('utf-8'))
+	customized_send(sock, username.encode('utf-8'))
+	customized_send(sock, filename.encode('utf-8'))
+
 	print('Delete operation completed..')
-	return
 
 
 def operation_list(username, sock):
@@ -151,19 +154,23 @@ def process(query, HOST, PORT):
 
 
 def main():
-	
 
 	if len(sys.argv) < 3:
 		print('Invalid command format\nUsage: python client.py 129.210.16.80 9999')
 		return
 
-	# Incorrect IP and Port exception needed **************************************
-	# ctrl+d ctrl+x on prompt exceptions needed
 	try:
 		HOST = sys.argv[1]
 		PORT = int(sys.argv[2])
 	except:
 		print('Invalid command format. Please provide a valid IP and Port number of the server.')
+
+	try:
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.connect((HOST, PORT))
+		sock.close()
+	except:
+		print('Unable to connect to the server. Kindly ensure that the server IP/hostname and Port number is accurate.')
 	
 	print('> Welcome! Type `help` for instructions')
 
@@ -175,5 +182,6 @@ def main():
 			flag = process(query, HOST, PORT)
 		except KeyboardInterrupt:
 			return
+
 
 main()

@@ -57,6 +57,12 @@ def create_remote_file(ip, filepath, localpath):
 	os.system(command)
 
 
+def delete_remote_file(ip, filepath, client_filename):
+
+	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"rm -rf %s/%s\"' % (ip, filepath, client_filename)
+	os.system(command)
+
+
 def validate_command_args():
 	if len(sys.argv) < 3:
 		print('Invalid command format.\nUsage: ./server.py 16 129.210.16.80 129.210.16.81 129.210.16.82')
@@ -146,12 +152,31 @@ def upload(conn, partition_power, disks):
 	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
 
 
+def delete_from_disk(disk, remotepath, client_filename, prompt=False):
+	delete_remote_file(disk, remotepath, client_filename)
+
+	if prompt:
+		print('Deleted %s from disk %s' % (client_filename, disk))
+
+
+def delete(conn, partition_power, disks):
+	client_username = customized_recv(conn).decode('utf-8')
+	client_filename = customized_recv(conn).decode('utf-8')
+
+	partition = get_partition(client_username, client_filename, partition_power)
+	disk, backup_disk = get_disk(partition, partition_power, disks)
+	remotepath = '/tmp/' + USERNAME + '/' + client_username
+	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
+
+	delete_from_disk(disk, remotepath, client_filename, True)
+	threading.Thread(target=delete_from_disk, args=(backup_disk, remotebackuppath, client_filename,)).start()
+
+
 def main():
 
 	if not validate_command_args():
 		return
 
-	# Exception needed for partition power > 32
 	try:
 		partition_power = int(sys.argv[1])
 	except:
@@ -162,19 +187,23 @@ def main():
 	if not validate_disk_addresses(disks):
 		return
 
-	# get valid disks within disks variable - include Y/n prompt
-
 	sock = create_socket()
 
 	for disk in disks:
 		create_remote_dir(disk, '/tmp/' + USERNAME)
 
 	while True:
-		conn, addr = sock.accept()
-
-		client_command = customized_recv(conn).decode('utf-8')
-		if client_command == 'upload':
-			upload(conn, partition_power, disks)
+		try:
+			conn, addr = sock.accept()
+			client_command = customized_recv(conn).decode('utf-8')
+			
+			if client_command == 'upload':
+				upload(conn, partition_power, disks)
+			elif client_command == 'delete':
+				delete(conn, partition_power, disks)
+		
+		except KeyboardInterrupt:
+			break
 
 	socket.close()
 
