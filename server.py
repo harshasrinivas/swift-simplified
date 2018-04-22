@@ -142,7 +142,7 @@ def upload(conn, partition_power, disks):
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
 
 	upload_to_disk(disk, remotepath, localpath, client_filename, True)
-	threading.Thread(target=upload_to_disk, args=(disk, remotepath, localpath, client_filename,)).start()
+	threading.Thread(target=upload_to_disk, args=(backup_disk, remotepath, localpath, client_filename,)).start()
 
 
 def main():
