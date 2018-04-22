@@ -39,16 +39,19 @@ def exceptions_log(case, arg=''):
 
 def operation_upload(username, filename, sock):
 	
-	customized_send(sock, 'upload'.encode('utf-8'))
-	customized_send(sock, username.encode('utf-8'))
-	customized_send(sock, filename.encode('utf-8'))
-	
 	try:
 		with open(filename, 'rb') as f:
-			customized_send(sock, f.read())
+			pass
 	except FileNotFoundError:
 		print('File %s does not exist in the current directory' % filename)
 		return
+
+	customized_send(sock, 'upload'.encode('utf-8'))
+	customized_send(sock, username.encode('utf-8'))
+	customized_send(sock, filename.encode('utf-8'))
+
+	with open(filename, 'rb') as f:
+		customized_send(sock, f.read())
 	
 	response = customized_recv(sock)
 
