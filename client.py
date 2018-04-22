@@ -10,6 +10,7 @@ def client_log(var, dt=False):
 
 	with open('client.log', 'a+') as f:
 		if dt:
+			print('='*40, file=f)
 			print(datetime.datetime.utcnow(), file=f)
 		print(var, file=f)
 
