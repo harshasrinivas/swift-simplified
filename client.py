@@ -173,10 +173,11 @@ def process(query, HOST, PORT):
 
 	if command == 'help':
 		print('USAGE:')
-		print('\tupload user/object')
-		print('\tdownload user/object')
-		print('\tdelete user/object')
-		print('\tlist user')
+		print('\t1. upload user/object')
+		print('\t2. download user/object')
+		print('\t3. delete user/object')
+		print('\t4. list user')
+		print('\t5. exit')
 		return True
 
 
