@@ -43,8 +43,12 @@ def operation_upload(username, filename, sock):
 	customized_send(sock, username.encode('utf-8'))
 	customized_send(sock, filename.encode('utf-8'))
 	
-	with open(filename, 'rb') as f:
-		customized_send(sock, f.read())
+	try:
+		with open(filename, 'rb') as f:
+			customized_send(sock, f.read())
+	except FileNotFoundError:
+		print('File %s does not exist in the current directory' % filename)
+		return
 	
 	response = customized_recv(sock)
 
