@@ -4,6 +4,7 @@ import sys
 import os
 import math
 import getpass
+import threading
 from subprocess import call
 from hashlib import md5
 
@@ -109,7 +110,16 @@ def get_disk(partition, partition_power, disks):
 	partitions = 2**partition_power
 	partitions_per_disk = partitions/len(disks)
 	disk = min(math.ceil(partition/partitions_per_disk), partition_power)
-	return disks[disk - 1]
+	backup_disk = (disk % len(disks)) + 1
+	return disks[disk - 1], disks[backup_disk - 1]
+
+
+def upload_to_disk(disk, remotepath, localpath, client_filename, prompt=False):
+	create_remote_dir(disk, remotepath)
+	create_remote_file(disk, remotepath, localpath)
+
+	if prompt:
+		print('Uploaded %s to disk %s' % (client_filename, disk))
 
 
 def upload(conn, partition_power, disks):
@@ -128,12 +138,11 @@ def upload(conn, partition_power, disks):
 		f.write(client_filedata)
 
 	partition = get_partition(client_username, client_filename, partition_power)
-	disk = get_disk(partition, partition_power, disks)
+	disk, backup_disk = get_disk(partition, partition_power, disks)
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
 
-	create_remote_dir(disk, remotepath)
-	create_remote_file(disk, remotepath, localpath)
-	print('Uploaded %s to disk %s' % (client_filename, disk))
+	upload_to_disk(disk, remotepath, localpath, client_filename, True)
+	threading.Thread(target=upload_to_disk, args=(disk, remotepath, localpath, client_filename,)).start()
 
 
 def main():
