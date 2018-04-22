@@ -122,6 +122,15 @@ def process(query, HOST, PORT):
 	command = query[0]
 	args = len(query)
 
+	if command == 'help':
+		print('USAGE:')
+		print('\tupload user/object')
+		print('\tdownload user/object')
+		print('\tdelete user/object')
+		print('\tlist user')
+		return True
+
+
 	if command == 'exit':
 		return False
 	
