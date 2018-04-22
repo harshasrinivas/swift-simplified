@@ -117,19 +117,23 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
-	localpath = './files/' + client_filename
+	upload_dir = './upload-files/'
+
+	if not os.path.exists(upload_dir):
+		os.makedirs(upload_dir)
+
+	localpath = upload_dir + client_filename
 
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
 
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk = get_disk(partition, partition_power, disks)
-	
-	print('Uploaded %s : partition %s - disk %s' % (localpath, partition, disk))
-
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
+
 	create_remote_dir(disk, remotepath)
 	create_remote_file(disk, remotepath, localpath)
+	print('Uploaded %s to disk %s' % (client_filename, disk))
 
 
 def main():
