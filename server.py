@@ -297,7 +297,7 @@ def list_from_disk(disk, client_username):
 							stderr=subprocess.PIPE)
 	result = ssh.stdout.readlines()
 
-	retval = ('%s (%s)' % (disk, socket.gethostbyaddr(disk)[0])).encode('utf-8')
+	retval = ('%s (%s)\n' % (disk, socket.gethostbyaddr(disk)[0])).encode('utf-8')
 
 	for i in result:
 		retval += i
