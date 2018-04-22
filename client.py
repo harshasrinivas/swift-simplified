@@ -65,7 +65,7 @@ def operation_download(username, filename, sock):
 	if not os.path.exists(download_subdir):
 		os.makedirs(download_subdir)
 
-	localpath = download_subdir + client_filename
+	localpath = download_subdir + filename
 
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
