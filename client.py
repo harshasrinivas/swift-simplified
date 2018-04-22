@@ -62,9 +62,10 @@ def operation_upload(username, filename, sock):
 		else:
 			return
 
-	remotepath = customized_recv(sock)
+	remotepath = customized_recv(sock).decode('utf-8')
+	hostname = customized_recv(sock).decode('utf-8')
 
-	print('Upload operation completed. File has been stored in %s at %s' % (response.decode('utf-8'), remotepath.decode('utf-8')))
+	print('Upload operation completed. File has been stored in %s (%s) at %s' % (response.decode('utf-8'), hostname, remotepath))
 
 
 def operation_download(username, filename, sock):
@@ -126,7 +127,8 @@ def operation_list(username, sock):
 		print('The requested user %s does not exist' % (username))
 		return
 	
-	print('List operation completed.')
+	response = customized_recv(sock)
+	print(response.decode('utf-8'))
 
 
 def evaluate_uname(username):

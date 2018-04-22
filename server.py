@@ -200,6 +200,7 @@ def upload(conn, partition_power, disks):
 
 	customized_send(conn, disk.encode('utf-8'))
 	customized_send(conn, remotepath.encode('utf-8'))
+	customized_send(conn, socket.gethostbyaddr(disk)[0].encode('utf-8'))
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -296,14 +297,18 @@ def list_from_disk(disk, client_username):
 							stderr=subprocess.PIPE)
 	result = ssh.stdout.readlines()
 
-	print('%s (%s)' % (disk, socket.gethostbyaddr(disk)[0]))
+	retval = b'%s (%s)' % (disk, socket.gethostbyaddr(disk)[0])
+
 	for i in result:
-		print(i.decode('utf-8'), end='')
+		retval += i
+
 
 	if len(result) == 0:
-		print('total 0')
+		retval += b'total 0\n'
 
-	print('')
+	retval += b'\n'
+	print(retval.decode('utf-8'))
+	return retval
 
 
 def list(conn, disks):
@@ -316,11 +321,14 @@ def list(conn, disks):
 		customized_send(conn, b'fail')
 		return
 
-	print('')
-	for disk in disks:
-		list_from_disk(disk, client_username)
-
 	customized_send(conn, b'success')
+	retval = b'\n'
+
+	for disk in disks:
+		retval += list_from_disk(disk, client_username)
+
+	customized_send(conn, retval)
+
 
 
 def main():
