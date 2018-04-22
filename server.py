@@ -187,10 +187,16 @@ def list_from_disk(disk, client_username):
 	for i in result:
 		print(i.decode('utf-8'), end='')
 
+	if len(result) == 0:
+		print('No files of %s are present in this disk' % client_username)
+
+	print('')
+
 
 def list(conn, disks):
 	client_username = customized_recv(conn).decode('utf-8')
-
+	
+	print('')
 	for disk in disks:
 		list_from_disk(disk, client_username)
 
