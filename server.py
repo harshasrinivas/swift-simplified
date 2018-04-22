@@ -153,7 +153,7 @@ def upload(conn, partition_power, disks):
 	client_filedata = customized_recv(conn)
 
 	upload_dir = './server-uploads/'
-	upload_subdir = './server-uploads/%s/' % username
+	upload_subdir = './server-uploads/%s/' % client_username
 
 	if not os.path.exists(upload_dir):
 		os.makedirs(upload_dir)
