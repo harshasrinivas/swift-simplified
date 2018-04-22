@@ -47,8 +47,10 @@ def operation_delete(username, filename, sock):
 
 
 def operation_list(username, sock):
+	customized_send(sock, 'list'.encode('utf-8'))
+	customized_send(sock, username.encode('utf-8'))
+	
 	print('List operation completed..')
-	return
 
 
 def evaluate_uname(username):

@@ -5,7 +5,7 @@ import os
 import math
 import getpass
 import threading
-from subprocess import call
+import subprocess
 from hashlib import md5
 
 USERNAME = getpass.getuser()
@@ -172,6 +172,29 @@ def delete(conn, partition_power, disks):
 	threading.Thread(target=delete_from_disk, args=(backup_disk, remotebackuppath, client_filename,)).start()
 
 
+def list_from_disk(disk, client_username):
+
+	HOST = disk
+	COMMAND= 'ls -lrt /tmp/%s/%s' % (USERNAME, client_username)
+
+	ssh = subprocess.Popen(["ssh", "%s" % HOST, COMMAND],
+							shell=False,
+							stdout=subprocess.PIPE,
+							stderr=subprocess.PIPE)
+	result = ssh.stdout.readlines()
+
+	print(disk)
+	for i in result:
+		print(i.decode('utf-8'), end='')
+
+
+def list(conn, disks):
+	client_username = customized_recv(conn).decode('utf-8')
+
+	for disk in disks:
+		list_from_disk(disk, client_username)
+
+
 def main():
 
 	if not validate_command_args():
@@ -205,6 +228,8 @@ def main():
 				upload(conn, partition_power, disks)
 			elif client_command == 'delete':
 				delete(conn, partition_power, disks)
+			elif client_command == 'list':
+				list(conn, disks)
 		
 		except KeyboardInterrupt:
 			break
