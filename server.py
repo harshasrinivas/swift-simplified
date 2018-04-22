@@ -178,7 +178,7 @@ def upload(conn, partition_power, disks):
 	try:
 		shutil.rmtree(upload_dir)
 	except FileNotFoundError:
-		continue
+		pass
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -214,7 +214,7 @@ def download(conn, partition_power, disks):
 	try:
 		shutil.rmtree(download_dir)
 	except FileNotFoundError:
-		continue
+		pass
 
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
