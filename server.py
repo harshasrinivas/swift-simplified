@@ -6,6 +6,7 @@ import math
 import getpass
 import threading
 import subprocess
+import shutil
 from hashlib import md5
 
 USERNAME = getpass.getuser()
@@ -174,6 +175,8 @@ def upload(conn, partition_power, disks):
 	upload_to_disk(disk, remotepath, localpath, client_filename, True)
 	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
 
+	shutil.rmtree(upload_dir)
+
 
 def download_from_disk(disk, remotepath, localpath, conn):
 
@@ -204,6 +207,8 @@ def download(conn, partition_power, disks):
 	localpath = download_subdir + client_filename
 
 	download_from_disk(disk, remotepath, localpath, conn)
+
+	shutil.rmtree(download_dir)
 
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
@@ -275,6 +280,12 @@ def main():
 	for disk in disks:
 		create_remote_dir(disk, '/tmp/' + USERNAME)
 		delete_remote_dir(disk, '/tmp/' + USERNAME)
+
+	upload_dir = './server-uploads/'
+	download_dir = './server-downloads/'
+
+	shutil.rmtree(upload_dir)
+	shutil.rmtree(download_dir)
 
 	while True:
 		try:
