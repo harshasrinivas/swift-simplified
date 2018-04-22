@@ -62,7 +62,9 @@ def operation_upload(username, filename, sock):
 		else:
 			return
 
-	print('Upload operation completed. File has been stored in %s' % response.decode('utf-8'))
+	remotepath = customized_recv(sock)
+
+	print('Upload operation completed. File has been stored in %s at %s' % (response.decode('utf-8'), remotepath.decode('utf-8')))
 
 
 def operation_download(username, filename, sock):
@@ -104,8 +106,11 @@ def operation_delete(username, filename, sock):
 
 	response = customized_recv(sock)
 
-	if response == b'fail':
-		print('The requested file %s does not exist' % filename)
+	if response == b'failuser':
+		print('The requested user %s does not exist' % (username))
+		return
+	elif response == b'failfile':
+		print('The requested file %s does not exist for user %s' % (filename, username))
 		return
 
 	print('Delete operation completed.')
@@ -114,6 +119,12 @@ def operation_delete(username, filename, sock):
 def operation_list(username, sock):
 	customized_send(sock, 'list'.encode('utf-8'))
 	customized_send(sock, username.encode('utf-8'))
+
+	response = customized_recv(sock)
+
+	if response == b'fail':
+		print('The requested user %s does not exist' % (username))
+		return
 	
 	print('List operation completed.')
 

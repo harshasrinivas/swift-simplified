@@ -199,6 +199,7 @@ def upload(conn, partition_power, disks):
 		pass
 
 	customized_send(conn, disk.encode('utf-8'))
+	customized_send(conn, remotepath.encode('utf-8'))
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -265,12 +266,12 @@ def delete(conn, partition_power, disks):
 
 	if client_username not in maindict:
 		print('User %s not found' % client_username)
-		customized_send(conn, b'fail')
+		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
 		print('File %s not found for User %s' % (client_filename, client_username))
-		customized_send(conn, b'fail')
+		customized_send(conn, b'failfile')
 		return
 
 	partition = get_partition(client_username, client_filename, partition_power)
@@ -311,13 +312,15 @@ def list(conn, disks):
 	global maindict
 
 	if client_username not in maindict:
-		# Send message to client
 		print('User %s not found' % client_username)
+		customized_send(conn, b'fail')
 		return
 
 	print('')
 	for disk in disks:
 		list_from_disk(disk, client_username)
+
+	customized_send(conn, b'success')
 
 
 def main():
