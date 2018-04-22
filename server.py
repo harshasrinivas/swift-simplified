@@ -11,6 +11,8 @@ from hashlib import md5
 
 USERNAME = getpass.getuser()
 
+maindict = dict()
+
 def customized_recvall(conn, count):
     buf = ''.encode('utf-8')
     while count:
@@ -173,12 +175,19 @@ def upload(conn, partition_power, disks):
 	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
 
 	upload_to_disk(disk, remotepath, localpath, client_filename, True)
-	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename,)).start()
+	upload_to_disk(backup_disk, remotebackuppath, localpath, client_filename)
 
 	try:
 		shutil.rmtree(upload_dir)
 	except FileNotFoundError:
 		pass
+
+	global maindict
+
+	if client_username not in maindict:
+		maindict[client_username] = set()
+
+	maindict[client_username].add(client_filename)
 
 
 def download_from_disk(disk, remotepath, localpath, conn):
@@ -193,6 +202,19 @@ def download(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	
+	global maindict
+
+	if client_username not in maindict:
+		# Send message to client
+		print('User %s not found' % client_username)
+		return
+
+	elif client_filename not in maindict[client_username]:
+		# Send message to client
+		print('File %s not found for User %s' % (client_filename, client_username))
+		return
+
+
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk, backup_disk = get_disk(partition, partition_power, disks)
 	remotepath = '/tmp/' + USERNAME + '/' + client_username + '/' + client_filename
@@ -228,6 +250,18 @@ def delete(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 
+	global maindict
+
+	if client_username not in maindict:
+		# Send message to client
+		print('User %s not found' % client_username)
+		return
+
+	elif client_filename not in maindict[client_username]:
+		# Send message to client
+		print('File %s not found for User %s' % (client_filename, client_username))
+		return
+
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk, backup_disk = get_disk(partition, partition_power, disks)
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
@@ -260,7 +294,14 @@ def list_from_disk(disk, client_username):
 
 def list(conn, disks):
 	client_username = customized_recv(conn).decode('utf-8')
-	
+
+	global maindict
+
+	if client_username not in maindict:
+		# Send message to client
+		print('User %s not found' % client_username)
+		return
+
 	print('')
 	for disk in disks:
 		list_from_disk(disk, client_username)
