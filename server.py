@@ -188,7 +188,7 @@ def list_from_disk(disk, client_username):
 							stderr=subprocess.PIPE)
 	result = ssh.stdout.readlines()
 
-	print(disk)
+	print('%s (%s)' % (disk, socket.gethostbyaddr(disk)[0]))
 	for i in result:
 		print(i.decode('utf-8'), end='')
 
