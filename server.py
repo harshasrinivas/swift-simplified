@@ -50,7 +50,7 @@ def create_remote_dir(ip, dirpath):
 
 def create_remote_file(ip, filepath, localpath):
 
-	command = 'scp -B %s %s:%s' % (localpath, ip, filepath)
+	command = 'scp -q -B %s %s:%s' % (localpath, ip, filepath)
 	os.system(command)
 
 	command = 'ssh -q -o "StrictHostKeyChecking no" %s \"chmod 666 %s/*\"' % (ip, filepath)
