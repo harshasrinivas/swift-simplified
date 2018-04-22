@@ -189,11 +189,11 @@ def download(conn, partition_power, disks):
 	
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk, backup_disk = get_disk(partition, partition_power, disks)
-	remotepath = '/tmp/' + USERNAME + '/' + client_username
-	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
+	remotepath = '/tmp/' + USERNAME + '/' + client_username + '/' + client_filename
+	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username + '/' + client_filename
 
 	download_dir = './server-downloads/'
-	download_subdir = './server-downloads/%s/' % username
+	download_subdir = './server-downloads/%s/' % client_username
 
 	if not os.path.exists(download_dir):
 		os.makedirs(download_dir)
