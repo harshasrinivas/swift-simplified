@@ -2,8 +2,17 @@ import socket
 import struct
 import sys
 import os
+import datetime
 
 COMMANDS_LIST = ['upload', 'download', 'delete', 'list']
+
+def client_log(var, dt=False):
+
+	with open('client.log', 'a+') as f:
+		if dt:
+			print(datetime.datetime.utcnow(), file=f)
+		print(var, file=f)
+
 
 def customized_recvall(conn, count):
     buf = ''.encode('utf-8')
@@ -30,11 +39,13 @@ def customized_send(sock, data):
 def exceptions_log(case, arg=''):
 
 	if case == 1:
-		print('Oops! That is an invalid command. Type `help` for instructions.')
+		output = 'Oops! That is an invalid command. Type `help` for instructions.'
 	elif case == 2:
-		print('Oops! Invalid command format. Type `help` for instructions.')
+		output = 'Oops! Invalid command format. Type `help` for instructions.'
 	elif case == 3:
-		print('Processing your request for %s. (Rest of the arguments would be ignored)' % arg)
+		output = 'Processing your request for %s. (Rest of the arguments would be ignored)' % arg
+	print(output)
+	client_log(output)
 
 
 def operation_upload(username, filename, sock):
@@ -43,7 +54,9 @@ def operation_upload(username, filename, sock):
 		with open(filename, 'rb') as f:
 			pass
 	except FileNotFoundError:
-		print('File %s does not exist in the current directory' % filename)
+		output = 'File %s does not exist in the current directory' % filename
+		print(output)
+		client_log(output)
 		return
 
 	customized_send(sock, 'upload'.encode('utf-8'))
@@ -56,7 +69,10 @@ def operation_upload(username, filename, sock):
 	response = customized_recv(sock)
 
 	if response == b'File already exists. Would you like to overwrite? (Y/n)':
-		print(response.decode('utf-8'))
+		output = response.decode('utf-8')
+		print(output)
+		client_log(output)
+
 		x = ''
 
 		while x == '':
@@ -66,13 +82,16 @@ def operation_upload(username, filename, sock):
 
 		if 'y' in x or 'Y' in x:
 			response = customized_recv(sock)
+			client_log(x)
 		else:
 			return
 
 	remotepath = customized_recv(sock).decode('utf-8')
 	hostname = customized_recv(sock).decode('utf-8')
 
-	print('Upload operation completed. File has been stored in %s (%s) at %s' % (response.decode('utf-8'), hostname, remotepath))
+	output = 'Upload operation completed. File has been stored in %s (%s) at %s' % (response.decode('utf-8'), hostname, remotepath)
+	print(output)
+	client_log(output)
 
 
 def operation_download(username, filename, sock):
@@ -83,10 +102,14 @@ def operation_download(username, filename, sock):
 	client_filedata = customized_recv(sock)
 
 	if client_filedata == b'failuser':
-		print('The requested user %s does not exist' % (username))
+		output = 'The requested user %s does not exist' % (username)
+		print(output)
+		client_log(output)
 		return
 	elif client_filedata == b'failfile':
-		print('The requested file %s does not exist for user %s' % (filename, username))
+		output = 'The requested file %s does not exist for user %s' % (filename, username)
+		print(output)
+		client_log(output)
 		return
 
 	download_dir = './client-downloads/'
@@ -103,7 +126,9 @@ def operation_download(username, filename, sock):
 	with open(localpath, 'wb+') as f:
 		f.write(client_filedata)
 
-	print('Download operation completed. File has been stored in %s' % download_subdir)
+	output = 'Download operation completed. File has been stored in %s' % download_subdir
+	print(output)
+	client_log(output)
 	return
 
 
@@ -115,13 +140,18 @@ def operation_delete(username, filename, sock):
 	response = customized_recv(sock)
 
 	if response == b'failuser':
-		print('The requested user %s does not exist' % (username))
+		output = 'The requested user %s does not exist' % (username)
+		print(output)
+		client_log(output)
 		return
 	elif response == b'failfile':
-		print('The requested file %s does not exist for user %s' % (filename, username))
+		output = 'The requested file %s does not exist for user %s' % (filename, username)
+		client_log(output)
 		return
 
-	print('Delete operation completed.')
+	output = 'Delete operation completed.'
+	print(output)
+	client_log(output)
 
 
 def operation_list(username, sock):
@@ -131,11 +161,15 @@ def operation_list(username, sock):
 	response = customized_recv(sock)
 
 	if response == b'fail':
-		print('The requested user %s does not exist' % (username))
+		output = 'The requested user %s does not exist' % (username)
+		print(output)
+		client_log(output)
 		return
 	
 	response = customized_recv(sock)
-	print(response.decode('utf-8'))
+	output = response.decode('utf-8')
+	print(output)
+	client_log(output)
 
 
 def evaluate_uname(username):
@@ -166,6 +200,8 @@ def evaluate_fpath(filepath):
 
 
 def process(query, HOST, PORT):
+
+	client_log(query, True)
 
 	query = query.split(' ')
 	command = query[0]
@@ -252,15 +288,21 @@ def process(query, HOST, PORT):
 
 def main():
 
+	print(var='', dt=True)
+
 	if len(sys.argv) < 3:
-		print('Invalid command format\nUsage: python client.py 129.210.16.80 9999 (or) python client.py linux60810.dc.engr.scu.edu 9999')
+		output = 'Invalid command format\nUsage: python client.py 129.210.16.80 9999 (or) python client.py linux60810.dc.engr.scu.edu 9999'
+		print(output)
+		client_log(output)
 		return
 
 	try:
 		HOST = sys.argv[1]
 		PORT = int(sys.argv[2])
 	except:
-		print('Invalid command format. Please provide a valid IP/hostname and Port number of the server.')
+		output = 'Invalid command format. Please provide a valid IP/hostname and Port number of the server.'
+		print(output)
+		client_log(output)
 
 	try:
 
@@ -271,7 +313,9 @@ def main():
 		sock.connect((HOST, PORT))
 		sock.close()
 	except:
-		print('Unable to connect to the server. Kindly ensure that the server IP/hostname and Port number is accurate.')
+		output = 'Unable to connect to the server. Kindly ensure that the server IP/hostname and Port number is accurate.'
+		print(output)
+		client_log(output)
 		return
 	
 	print('> Welcome! Type `help` for instructions')
@@ -285,7 +329,9 @@ def main():
 		except KeyboardInterrupt:
 			return
 		except ConnectionRefusedError:
-			print('Server seems to be down at the moment. Please try again later.')
+			output = 'Server seems to be down at the moment. Please try again later.'
+			print(output)
+			client_log(output)
 			return
 		except:
 			continue
