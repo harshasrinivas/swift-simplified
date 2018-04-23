@@ -71,6 +71,9 @@ def create_socket():
 	output = 'To connect to this server, use the following command:\npython3 client.py %s %s\n(or)\npython3 client.py %s %s' % (IP_ADDRESS, PORT, HOSTNAME, PORT)
 	print(output)
 	server_log(output)
+	print('-------------------------------------------------------')
+	print('NOTE: To stop the server at any instant, press Ctrl + C')
+	print('-------------------------------------------------------')
 
 	return sock
 
