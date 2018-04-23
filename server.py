@@ -190,7 +190,9 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
-	server_log('upload ' + client_username + ' ' + client_filename, True)
+	output = '> upload ' + client_username + ' ' + client_filename
+	print(output)
+	server_log(output, True)
 
 	global maindict
 
@@ -247,19 +249,21 @@ def download(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	
-	server_log('download ' + client_username + ' ' + client_filename, True)
+	output = '> download ' + client_username + ' ' + client_filename
+	print(output)
+	server_log(output, True)
 
 	global maindict
 
 	if client_username not in maindict:
-		output = 'User %s not found' % client_username
+		output = 'The requested user %s does not exist' % client_username
 		print(output)
 		server_log(output)
 		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		output = 'File %s not found for User %s' % (client_filename, client_username)
+		output = 'The requested file %s does not exist for user %s' % (client_filename, client_username)
 		print(output)
 		server_log(output)
 		customized_send(conn, b'failfile')
@@ -303,19 +307,21 @@ def delete(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 
-	server_log('delete ' + client_username + ' ' + client_filename, True)
+	output = '> delete ' + client_username + ' ' + client_filename
+	print(output)
+	server_log(output, True)
 
 	global maindict
 
 	if client_username not in maindict:
-		output = 'User %s not found' % client_username
+		output = 'The requested user %s does not exist' % client_username
 		print(output)
 		server_log(output)
 		customized_send(conn, b'failuser')
 		return
 
 	elif client_filename not in maindict[client_username]:
-		output = 'File %s not found for User %s' % (client_filename, client_username)
+		output = 'The requested file %s does not exist for user %s' % (client_filename, client_username)
 		print(output)
 		server_log(output)
 		customized_send(conn, b'failfile')
@@ -364,12 +370,14 @@ def list_from_disk(disk, client_username):
 def list(conn, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 
-	server_log('list ' + client_username, True)
+	output = '> list ' + client_username
+	print(output)
+	server_log(output, True)
 
 	global maindict
 
 	if client_username not in maindict:
-		output = 'User %s not found' % client_username
+		output = 'The requested user %s does not exist' % client_username
 		print(output)
 		server_log(output)
 		customized_send(conn, b'fail')
