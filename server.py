@@ -171,16 +171,16 @@ def get_disk(partition, partition_power, disks):
 	return disks[disk - 1], disks[backup_disk - 1]
 
 
-def upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, prompt=False):
+def upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, client_username, prompt=False):
 	create_remote_dir(disk, remotepath)
 	create_remote_file(disk, remotepath, localpath)
 
 	if prompt:
-		output = 'Uploaded %s to disk %s' % (client_filename, disk)
+		output = 'Uploaded %s/%s to disk %s' % (client_username, client_filename, disk)
 		print(output)
 		server_log(output)
 	else:
-		output = 'Uploaded backup of %s to disk %s' % (client_filename, disk)
+		output = 'Uploaded backup of %s/%s to disk %s' % (client_username, client_filename, disk)
 		print(output)
 		server_log(output)
 
@@ -227,8 +227,8 @@ def upload(conn, partition_power, disks):
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
 	remotebackuppath = '/tmp/' + USERNAME + '/backup/' + client_username
 
-	upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, True)
-	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename, upload_dir,)).start()
+	upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, client_username, True)
+	threading.Thread(target=upload_to_disk, args=(backup_disk, remotebackuppath, localpath, client_filename, upload_dir, client_username,)).start()
 
 	customized_send(conn, disk.encode('utf-8'))
 	customized_send(conn, remotepath.encode('utf-8'))
