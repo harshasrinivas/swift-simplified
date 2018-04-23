@@ -58,6 +58,9 @@ def operation_upload(username, filename, sock):
 		output = 'File %s does not exist in the current directory' % filename
 		print(output)
 		client_log(output)
+		customized_send(sock, 'upload'.encode('utf-8'))
+		customized_send(sock, 'failedupload'.encode('utf-8'))
+		customized_send(sock, filename.encode('utf-8'))
 		return
 
 	customized_send(sock, 'upload'.encode('utf-8'))
