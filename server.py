@@ -198,7 +198,7 @@ def upload(conn, partition_power, disks):
 	client_filename = customized_recv(conn).decode('utf-8')
 	client_filedata = customized_recv(conn)
 
-	output = '> upload ' + client_username + ' ' + client_filename
+	output = '> upload ' + client_username + '/' + client_filename
 	print(output)
 	server_log(output, True)
 
@@ -257,7 +257,7 @@ def download(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 	
-	output = '> download ' + client_username + ' ' + client_filename
+	output = '> download ' + client_username + '/' + client_filename
 	print(output)
 	server_log(output, True)
 
@@ -301,6 +301,10 @@ def download(conn, partition_power, disks):
 	except FileNotFoundError:
 		pass
 
+	output = 'Download operation completed.'
+	print(output)
+	server_log(output)
+
 
 def delete_from_disk(disk, remotepath, client_filename, prompt=False):
 	delete_remote_file(disk, remotepath, client_filename)
@@ -315,7 +319,7 @@ def delete(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 	client_filename = customized_recv(conn).decode('utf-8')
 
-	output = '> delete ' + client_username + ' ' + client_filename
+	output = '> delete ' + client_username + '/' + client_filename
 	print(output)
 	server_log(output, True)
 
