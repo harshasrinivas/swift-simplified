@@ -188,7 +188,7 @@ def upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, cli
 def upload(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 
-	if client_username == b'failedupload':
+	if client_username == 'failedupload':
 		client_filename = customized_recv(conn).decode('utf-8')
 		output = 'File %s does not exist in the current directory' % client_filename
 		print(output)
