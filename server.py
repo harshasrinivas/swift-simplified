@@ -184,11 +184,6 @@ def upload_to_disk(disk, remotepath, localpath, client_filename, upload_dir, pro
 		print(output)
 		server_log(output)
 
-		try:
-			shutil.rmtree(upload_dir)
-		except FileNotFoundError:
-			pass
-
 
 def upload(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
