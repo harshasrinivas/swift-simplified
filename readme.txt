@@ -14,6 +14,7 @@ SERVER:
 python3 server.py 16 129.210.16.84 129.210.16.85 129.210.16.86
 This command will start the server and also display the details of server IP, hostname and Port
 NOTE: Machine IP range must be between 129.210.16.71 to 129.210.16.95 - those are the only SSH-accessible Linux systems on the SCU Design Center.
+To stop the server at any instant, press Ctrl + C
 
 CLIENT:
 python3 client.py <server-ip/hostname> <port>
