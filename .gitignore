@@ -57,5 +57,5 @@ docs/_build/
 # PyBuilder
 target/
 
-*.txt
+testing.txt
 *DS_Store
