@@ -192,7 +192,7 @@ def upload(conn, partition_power, disks):
 		client_filename = customized_recv(conn).decode('utf-8')
 		output = 'File %s does not exist in the current directory' % client_filename
 		print(output)
-		client_log(output)
+		server_log(output)
 		return
 
 	client_filename = customized_recv(conn).decode('utf-8')
