@@ -14,6 +14,82 @@ USERNAME = getpass.getuser()
 
 maindict = dict()
 
+def user_files_exist(client_username, partition_power, disks):
+	
+	global maindict
+
+	ans = True
+
+	for filename in maindict[client_username]:
+		ans = ans & file_exists(client_username, filename, partition_power, disks)
+
+	return ans
+
+
+def user_files_backup_exist(client_username, partition_power, disks):
+
+	global maindict
+	
+	ans = True
+
+	for filename in maindict[client_username]:
+		ans = ans & file_backup_exists(client_username, filename, partition_power, disks)
+
+	return ans
+
+
+def file_exists(client_username, client_filename, partition_power, disks):
+
+	partition = get_partition(client_username, client_filename, partition_power)
+	disk, backup_disk = get_disk(partition, partition_power, disks)
+
+	HOST = disk
+	COMMAND = '(ls /tmp/%s/%s/%s >> /dev/null 2>&1 && echo yes) || echo no' % (USERNAME, client_username, client_filename)
+
+	ssh = subprocess.Popen(["ssh", "%s" % HOST, COMMAND],
+							shell=False,
+							stdout=subprocess.PIPE,
+							stderr=subprocess.PIPE)
+	result = ssh.stdout.readlines()[0].split()[0].decode('utf-8')
+	returnval = result == 'yes'
+
+	if not returnval:
+
+		remotepath = '/tmp/%s/backup/%s/%s' % (USERNAME, client_username, client_filename)
+		originalpath = '/tmp/%s/%s/' % (USERNAME, client_username)
+		create_remote_dir(disk, originalpath)
+
+		command = 'scp -q -B %s:%s %s:%s' % (backup_disk, remotepath, disk, originalpath)
+		os.system(command)
+
+	return returnval
+
+
+def file_backup_exists(client_username, client_filename, partition_power, disks):
+
+	partition = get_partition(client_username, client_filename, partition_power)
+	disk, backup_disk = get_disk(partition, partition_power, disks)
+
+	HOST = backup_disk
+	COMMAND = '(ls /tmp/%s/backup/%s/%s >> /dev/null 2>&1 && echo yes) || echo no' % (USERNAME, client_username, client_filename)
+
+	ssh = subprocess.Popen(["ssh", "%s" % HOST, COMMAND],
+							shell=False,
+							stdout=subprocess.PIPE,
+							stderr=subprocess.PIPE)
+	result = ssh.stdout.readlines()[0].split()[0].decode('utf-8')
+	returnval = result == 'yes'
+
+	if not returnval:
+		originalpath = '/tmp/%s/backup/%s/' % (USERNAME, client_username)
+		remotepath = '/tmp/%s/%s/%s' % (USERNAME, client_username, client_filename)
+		create_remote_dir(backup_disk, originalpath)
+
+		command = 'scp -q -B %s:%s %s:%s' % (disk, remotepath, backup_disk, originalpath)
+		os.system(command)
+
+	return returnval
+
 
 def server_log(var, dt=False):
 
@@ -280,6 +356,11 @@ def download(conn, partition_power, disks):
 		customized_send(conn, b'failfile')
 		return
 
+	if not file_exists(client_username, client_filename, partition_power, disks):
+		print('***************** RETRIEVED *****************')
+
+	if not file_backup_exists(client_username, client_filename, partition_power, disks):
+		print('***************** RETRIEVED BACKUP *****************')
 
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk, backup_disk = get_disk(partition, partition_power, disks)
@@ -342,6 +423,12 @@ def delete(conn, partition_power, disks):
 		customized_send(conn, b'failfile')
 		return
 
+	if not file_exists(client_username, client_filename, partition_power, disks):
+		print('***************** RETRIEVED *****************')
+
+	if not file_backup_exists(client_username, client_filename, partition_power, disks):
+		print('***************** RETRIEVED BACKUP *****************')
+
 	partition = get_partition(client_username, client_filename, partition_power)
 	disk, backup_disk = get_disk(partition, partition_power, disks)
 	remotepath = '/tmp/' + USERNAME + '/' + client_username
@@ -382,7 +469,7 @@ def list_from_disk(disk, client_username):
 	return retval
 
 
-def list(conn, disks):
+def list(conn, partition_power, disks):
 	client_username = customized_recv(conn).decode('utf-8')
 
 	output = '> list ' + client_username
@@ -400,6 +487,12 @@ def list(conn, disks):
 
 	customized_send(conn, b'success')
 	retval = b'\n'
+
+	if not user_files_exist(client_username, partition_power, disks):
+		print('***************** RETRIEVED *****************')
+
+	if not user_files_backup_exist(client_username, partition_power, disks):
+		print('***************** RETRIEVED BACKUP *****************')
 
 	for disk in disks:
 		retval += list_from_disk(disk, client_username)
@@ -461,7 +554,7 @@ def main():
 			elif client_command == 'delete':
 				delete(conn, partition_power, disks)
 			elif client_command == 'list':
-				list(conn, disks)
+				list(conn, partition_power, disks)
 		
 		except KeyboardInterrupt:
 			break
