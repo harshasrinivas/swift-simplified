@@ -631,7 +631,6 @@ def add_disk(conn, partition_power):
 				[client_username, client_filename] = var.split('/')
 				originalpath = '/tmp/%s/%s/' % (USERNAME, client_username)
 				create_remote_dir(n, originalpath)
-				print('transfer ' + var + ' from ' + disk + ' to ' + n)
 				transfer(disk, originalpath + client_filename, n, originalpath)
 				delete_remote_file(disk, originalpath, client_filename)
 
@@ -650,7 +649,6 @@ def add_disk(conn, partition_power):
 			
 			originalpath = '/tmp/%s/backup/%s/' % (USERNAME, client_username)
 			
-			print('transfer backup of ' + var + ' from ' + cb + ' to ' + nb)
 			create_remote_dir(nb, originalpath)
 			transfer(cb, originalpath + client_filename, nb, originalpath)
 			delete_remote_file(cb, originalpath, client_filename)
@@ -720,7 +718,6 @@ def remove_disk(conn, partition_power):
 			[client_username, client_filename] = var.split('/')
 			originalpath = '/tmp/%s/%s/' % (USERNAME, client_username)
 			create_remote_dir(disk, originalpath)
-			print('transfer ' + var + ' from ' + n + ' to ' + disk)
 			transfer(n, originalpath + client_filename, disk, originalpath)
 
 		i = i + 1
@@ -738,7 +735,6 @@ def remove_disk(conn, partition_power):
 			
 			originalpath = '/tmp/%s/backup/%s/' % (USERNAME, client_username)
 			
-			print('transfer backup of ' + var + ' from ' + cb + ' to ' + nb)
 			create_remote_dir(nb, originalpath)
 			transfer(cb, originalpath + client_filename, nb, originalpath)
 			delete_remote_file(cb, originalpath, client_filename)
@@ -833,16 +829,6 @@ def main():
 				add_disk(conn, partition_power)
 			elif client_command == 'remove':
 				remove_disk(conn, partition_power)
-
-			print('')
-			for uf in loc_userfile:
-				print(uf, loc_disk[uf], loc_userfile[uf])
-			print('')
-
-			for d in disk_loc:
-				print(d, disk_loc[d])
-
-			print('')
 
 		except KeyboardInterrupt:
 			break
