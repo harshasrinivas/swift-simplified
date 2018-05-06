@@ -4,7 +4,7 @@ import sys
 import os
 import datetime
 
-COMMANDS_LIST = ['upload', 'download', 'delete', 'list']
+COMMANDS_LIST = ['upload', 'download', 'delete', 'list', 'add', 'remove']
 
 def client_log(var, dt=False):
 
@@ -72,7 +72,7 @@ def operation_upload(username, filename, sock):
 	
 	response = customized_recv(sock)
 
-	if response == b'File already exists. Would you like to overwrite? (Y/n)':
+	if 'overwrite' in response.decode('utf-8'):
 		output = response.decode('utf-8')
 		print(output)
 		client_log(output)
@@ -133,6 +133,13 @@ def operation_download(username, filename, sock):
 	output = 'Download operation completed. File has been stored in %s' % download_subdir
 	print(output)
 	client_log(output)
+
+	print('File content:')
+	print('='*20)
+	with open(localpath, 'rb') as f:
+		print(f.read().decode('utf-8'))
+	print('='*20)
+
 	return
 
 
@@ -167,6 +174,42 @@ def operation_list(username, sock):
 
 	if response == b'fail':
 		output = 'The requested user %s does not exist' % (username)
+		print(output)
+		client_log(output)
+		return
+	
+	response = customized_recv(sock)
+	output = response.decode('utf-8')
+	print(output)
+	client_log(output)
+
+
+def operation_add(disk, sock):
+	customized_send(sock, 'add'.encode('utf-8'))
+	customized_send(sock, disk.encode('utf-8'))
+
+	response = customized_recv(sock)
+
+	if response == b'fail':
+		output = 'Invalid disk'
+		print(output)
+		client_log(output)
+		return
+	
+	response = customized_recv(sock)
+	output = response.decode('utf-8')
+	print(output)
+	client_log(output)
+
+
+def operation_remove(disk, sock):
+	customized_send(sock, 'remove'.encode('utf-8'))
+	customized_send(sock, disk.encode('utf-8'))
+
+	response = customized_recv(sock)
+
+	if response == b'fail':
+		output = 'Invalid disk'
 		print(output)
 		client_log(output)
 		return
@@ -218,6 +261,8 @@ def process(query, HOST, PORT):
 		print('\t2. download user/object')
 		print('\t3. delete user/object')
 		print('\t4. list user')
+		print('\t5. add disk-ip/hostname')
+		print('\t6. remove disk-ip/hostname')
 		print('\t5. exit')
 		return True
 
@@ -247,6 +292,9 @@ def process(query, HOST, PORT):
 		if command == 'list':
 			if evaluate_uname(query[1]):
 				return True
+
+		elif command == 'add' or command == 'remove':
+			disk = query[1]
 
 		else:
 			if evaluate_fpath(query[1]):
@@ -285,6 +333,12 @@ def process(query, HOST, PORT):
 		
 		elif command == 'delete':
 			operation_delete(username, filename, sock)
+
+		elif command == 'add':
+			operation_add(disk, sock)
+
+		elif command == 'remove':
+			operation_remove(disk, sock)
 
 		sock.close()
 

@@ -14,7 +14,6 @@ SERVER:
 python3 server.py 16 129.210.16.84 129.210.16.85 129.210.16.86
 This command will start the server and also display the details of server IP, hostname and Port
 NOTE: Machine IP range must be between 129.210.16.71 to 129.210.16.95 - those are the only SSH-accessible Linux systems on the SCU Design Center.
-To stop the server at any instant, press Ctrl + C
 
 CLIENT:
 python3 client.py <server-ip/hostname> <port>
@@ -30,7 +29,9 @@ AVAILABLE COMMANDS ON CLIENT:
 2. download user/object
 3. delete user/object
 4. list user
-5. exit
+5. add disk (supports ip/hostname)
+6. remove disk (supports ip/hostname)
+7. exit
 
 LOGGING:
 1. Client side logs are stored in a file named "client.log", created in the same folder where you run the Client
@@ -42,3 +43,7 @@ FEATURES SUMMARIZED:
 3. Displays output on both client and server windows
 4. Coding Standard - PEP8
 5. Automation for Client and Server side
+6. Display file content on download command
+7. Add and Remove disks
+8. Original and backup auto-retrieval
+
